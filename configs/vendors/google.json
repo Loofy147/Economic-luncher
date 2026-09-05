@@ -1,31 +1,79 @@
 {
   "vendor": "google",
   "as_of": "2026-09-05",
-  "source": "ai.google.dev/pricing",
+  "source": "https://ai.google.dev/gemini-api/docs/pricing",
   "models": {
     "gemini-3.1-flash-lite": {
-      "input_usd_per_m": 0.25, "output_usd_per_m": 1.50, "cache_read_usd_per_m": 0.025,
-      "context_window": 1000000, "long_context_threshold_tokens": null
+      "canonical_model_id": "gemini-3.1-flash-lite",
+      "status": "verified",
+      "input_usd_per_m": 0.25,
+      "output_usd_per_m": 1.50,
+      "cache_read_usd_per_m": 0.025,
+      "context_window": 1000000,
+      "long_context_threshold_tokens": null
     },
-    "gemini-3.8-flash": {
-      "input_usd_per_m": 0.75, "output_usd_per_m": 3.75, "cache_read_usd_per_m": 0.075,
-      "context_window": 1000000, "long_context_threshold_tokens": null,
-      "pricing_status": "introductory_through_2026-12-31",
-      "standard_rate_from_2027-01-01": {"input_usd_per_m": 1.50, "output_usd_per_m": 7.50, "cache_read_usd_per_m": 0.15}
+    "gemini-3-flash-preview": {
+      "canonical_model_id": "gemini-3-flash-preview",
+      "status": "verified",
+      "input_usd_per_m": 0.50,
+      "output_usd_per_m": 3.00,
+      "cache_read_usd_per_m": 0.05,
+      "context_window": 1000000,
+      "long_context_threshold_tokens": null,
+      "pricing_status": "current"
     },
-    "gemini-3.1-pro": {
-      "input_usd_per_m": 2.00, "output_usd_per_m": 12.00, "cache_read_usd_per_m": 0.20,
+    "gemini-3.1-pro-preview": {
+      "canonical_model_id": "gemini-3.1-pro-preview",
+      "status": "verified",
+      "input_usd_per_m": 2.00,
+      "output_usd_per_m": 12.00,
+      "cache_read_usd_per_m": 0.20,
       "context_window": 1000000,
       "long_context_threshold_tokens": 200000,
-      "long_context_rates": {"input_usd_per_m": 4.00, "output_usd_per_m": 18.00, "cache_read_usd_per_m": 0.40}
+      "long_context_rates": {
+        "input_usd_per_m": 4.00,
+        "output_usd_per_m": 18.00,
+        "cache_read_usd_per_m": 0.40
+      },
+      "pricing_status": "current"
+    },
+    "gemini-3.7-flash": {
+      "canonical_model_id": "gemini-3.7-flash",
+      "status": "verified",
+      "input_usd_per_m": 0.75,
+      "output_usd_per_m": 3.75,
+      "cache_read_usd_per_m": 0.075,
+      "context_window": 1000000,
+      "long_context_threshold_tokens": null,
+      "pricing_status": "introductory_through_2026-12-31",
+      "standard_rate_from_2027-01-01": {
+        "input_usd_per_m": 1.50,
+        "output_usd_per_m": 7.50,
+        "cache_read_usd_per_m": 0.15
+      }
     }
   },
   "tools": {
     "search_grounding": {
+      "status": "verified",
       "free_requests_per_month_per_project": 5000,
       "usd_per_1k_requests_after": 14,
       "shared_across": "all Gemini 3.x models in the project"
     },
-    "maps_grounding": {"note": "separate allowance from search_grounding"}
-  }
+    "maps_grounding": {
+      "status": "verified_separate_allowance",
+      "free_requests_per_month": 5000,
+      "usd_per_1k_requests_after": 14
+    }
+  },
+  "rejected_model_aliases": [
+    {
+      "alias": "gemini-3.8-flash",
+      "reason": "Not present as a canonical model ID on the current official Gemini pricing/model documentation reviewed on 2026-09-05. Do not use in ground-truth calculations."
+    },
+    {
+      "alias": "gemini-3.1-pro",
+      "reason": "Use the canonical documented preview ID gemini-3.1-pro-preview for current pricing evidence."
+    }
+  ]
 }
