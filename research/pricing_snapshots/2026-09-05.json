@@ -1,20 +1,23 @@
 {
   "snapshot_date": "2026-09-05",
-  "purpose": "Versioned, sourced capture of every rate used by this engine on this date. Re-run scenarios against this file to reproduce September 2026 results even after live vendor pricing changes.",
+  "status": "verified_partial",
+  "purpose": "Versioned capture of vendor facts used by the engine. Each entry carries an evidence status; unknown or inferred semantics must not be promoted to ground truth.",
   "entries": [
-    {"vendor": "vercel", "fact": "Pro $20/mo + $20 usage credit; commercial use requires Pro, not Hobby", "source": "vercel.com/docs/functions/usage-and-pricing"},
-    {"vendor": "vercel", "fact": "Active CPU excludes I/O wait (DB queries, AI model calls); Provisioned Memory bills for the full in-flight duration including I/O wait", "source": "vercel.com/docs/functions/usage-and-pricing"},
-    {"vendor": "cursor", "fact": "Pro $20/mo including $20 model-usage credit", "source": "cursor.com/pricing"},
-    {"vendor": "supabase", "fact": "Free tier to 50,000 MAU; Pro $25/mo includes 100,000 MAU; overage $0.00325/MAU beyond that", "source": "supabase.com/pricing"},
-    {"vendor": "upstash", "fact": "Free 500,000 commands/mo; PAYG $0.20/100K commands with no free-allowance carry-over on upgrade; Fixed plans from $10/mo (250MB)", "source": "upstash.com/pricing/redis"},
-    {"vendor": "resend", "fact": "Free 3,000/mo; Pro $20/50K and $35/100K; Scale $90/100K down to $1,150/2.5M with overage tiering from $0.90 to $0.46 per 1,000; verified crossover where Scale beats Pro on pure price is ~455,000-460,000 emails/month, not the commonly-assumed ~200,000", "source": "resend.com/docs/knowledge-base/what-is-resend-pricing"},
-    {"vendor": "stripe", "fact": "Standard US online rate: 2.9% + $0.30/transaction", "source": "stripe.com/pricing"},
-    {"vendor": "anthropic", "fact": "Claude Sonnet 5: $2/$10 per M input/output confirmed as the standing rate (a previously-announced $3/$15 September increase did not take effect); cache writes 1.25x (5-min) / 2x (1-hr); cache reads 0.1x", "source": "docs.claude.com pricing"},
-    {"vendor": "openai", "fact": "GPT-5.6 Sol: $4/$20 per M, promotional through 2026-11-21 (standard rate $5/$30); long-context tier above 272K tokens roughly doubles input/cache and multiplies output 1.5x on the full request", "source": "developers.openai.com/api/docs/models"},
-    {"vendor": "google", "fact": "Gemini 3.1 Pro: $2/$12 to 200K tokens, $4/$18 beyond; Gemini 3.8 Flash: $0.75/$3.75 introductory through 2026-12-31, rising to $1.50/$7.50 on 2027-01-01; 5,000 free Search-grounding requests/month shared across the Gemini 3.x family, then $14/1,000", "source": "ai.google.dev/pricing"}
+    {"vendor":"vercel","status":"verified","facts":["Pro $20/mo with $20 usage credit","Hobby is for personal/non-commercial use","Fluid Compute Active CPU excludes I/O wait; Provisioned Memory remains relevant during in-flight I/O"],"source":"https://vercel.com/pricing","effective_date":"2026-09-05"},
+    {"vendor":"cursor","status":"verified","facts":["Pro $20/mo"],"source":"https://cursor.com/pricing","effective_date":"2026-09-05"},
+    {"vendor":"supabase","status":"verified","facts":["Free to 50,000 MAU","Pro $25/mo includes 100,000 MAU","MAU overage $0.00325 per MAU beyond the included amount"],"source":"https://supabase.com/pricing","effective_date":"2026-09-05","scope_note":"This snapshot does not model compute, storage, egress, or add-on meters."},
+    {"vendor":"upstash","status":"verified","facts":["Free: 500K commands/month, 256MB data, 10GB monthly bandwidth","PAYG: $0.20 per 100K commands","Fixed 250MB: $10/month, 50GB monthly bandwidth","PAYG also has separate storage and bandwidth meters"],"source":"https://upstash.com/pricing/redis","effective_date":"2026-09-05","optimizer_note":"Plan selection must consider commands, storage, bandwidth, and read regions."},
+    {"vendor":"resend","status":"verified","facts":["Free: 3,000 emails/month","Pro: $20/month, 50K included, $0.90/1K extra","Scale: $90/month, 100K included, $0.90/1K extra","Current pricing page exposes higher-volume calculator tiers and plan-specific capabilities"],"source":"https://resend.com/pricing/","effective_date":"2026-09-05","optimizer_note":"Do not hard-code a single crossover threshold; optimize published tiers subject to capabilities and limits."},
+    {"vendor":"stripe","status":"verified_baseline","facts":["Standard US online card baseline: 2.9% + $0.30/transaction"],"source":"https://stripe.com/pricing","effective_date":"2026-09-05","scope_note":"Actual payment economics vary by payment method, geography, currency, and other conditions."},
+    {"vendor":"anthropic","status":"verified","facts":["Claude Sonnet 5: $2/M input, $10/M output","5m cache write: $2.50/M","1h cache write: $4/M","cache read: $0.20/M","1M context window; no separate long-context price surcharge listed"],"source":"https://platform.claude.com/docs/en/about-claude/pricing","effective_date":"2026-09-05"},
+    {"vendor":"openai","status":"verified_with_semantics_caveat","facts":["GPT-5.6 Sol: $4/M input, $0.40/M cached input, $20/M output","1.05M context window",">272K input tokens: 2x input and 1.5x output on the full request","Cache writes are billed at 1.25x uncached input token rate"],"source":"https://developers.openai.com/api/docs/models/gpt-5.6-sol","effective_date":"2026-09-05","known_semantics_question":"Compound interaction between long-context request multiplier and cache-write billing should be verified with an explicit billing example before treating the derived cache-write long-context rate as confirmed."},
+    {"vendor":"google","status":"verified_partial","facts":["gemini-3.1-flash-lite: $0.25/M input, $1.50/M output, $0.025/M cached input","gemini-3-flash-preview: $0.50/M input, $3.00/M output, $0.05/M cached input","gemini-3.1-pro-preview: $2/M input and $12/M output below 200K; $4/M input and $18/M output above 200K","Gemini 3.x Search grounding: 5,000 free requests/month shared across the family, then $14/1K","Gemini 3 Maps grounding: 5,000 free prompts/month shared across Gemini 3, then $14/1K","gemini-3.7-flash: $0.75/M input, $3.75/M output through 2026-12-31; $1.50/$7.50 from 2027-01-01"],"source":"https://ai.google.dev/gemini-api/docs/pricing","effective_date":"2026-09-05","identity_note":"Aliases previously stored as gemini-3.8-flash and gemini-3.1-pro were removed from ground-truth calculations; canonical IDs are required."}
   ],
-  "known_unknowns": [
-    "GPT-5.6 Sol's exact long-context multiplier is derived from the documented ratio pattern at the non-promotional $5/$30 rate, applied to the current promotional base -- treat as a reasoned estimate, not a vendor-confirmed figure, until OpenAI publishes the promotional long-context rate explicitly.",
-    "Supabase compute-tier, storage, and egress costs beyond the Micro instance are not modeled -- infrastructure.cost only covers the Auth/MAU billing meter, Upstash, and Resend."
+  "known_unknowns":[
+    "Supabase compute/storage/egress and many add-ons are outside the baseline MAU model.",
+    "Vercel workload-specific resource costs require a resource trace rather than MAU alone.",
+    "OpenAI compound cache-write plus long-context billing semantics remain a bounded research question.",
+    "Resend plan selection must account for capabilities as well as raw price.",
+    "Provider pricing and model availability are time-varying; a new live verification must create a new immutable snapshot."
   ]
 }
