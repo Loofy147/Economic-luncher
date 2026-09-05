@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cost Topology — Zero-CAPEX Venture Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --ink:#12181B;
+  --panel:#1B2328;
+  --panel-2:#202B31;
+  --line:#2C383F;
+  --line-soft:#222C31;
+  --text:#EDEAE2;
+  --text-dim:#8FA0A8;
+  --teal:#5FA8A0;
+  --amber:#D98E4A;
+  --brick:#C75146;
+  --font-display:'Fraunces', serif;
+  --font-body:'IBM Plex Sans', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 15% 20%, rgba(95,168,160,0.05), transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(217,142,74,0.05), transparent 40%),
+    repeating-radial-gradient(circle at 50% 120%, transparent 0, transparent 60px, rgba(255,255,255,0.012) 61px, rgba(255,255,255,0.012) 62px),
+    var(--ink);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  line-height:1.5;
+}
+
+a{color:var(--teal);}
+
+.app{
+  display:flex;
+  min-height:100vh;
+  max-width:1400px;
+  margin:0 auto;
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  width:230px;
+  flex-shrink:0;
+  border-right:1px solid var(--line);
+  padding:28px 18px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:20px;
+  letter-spacing:0.2px;
+  margin-bottom:2px;
+}
+.brand-sub{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+  margin-bottom:32px;
+  display:block;
+}
+.nav{list-style:none;padding:0;margin:0;}
+.nav li{margin-bottom:4px;}
+.nav button{
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:none;
+  color:var(--text-dim);
+  font-family:var(--font-body);
+  font-size:14px;
+  padding:10px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition:background .15s, color .15s;
+}
+.nav button:hover{background:var(--panel);color:var(--text);}
+.nav button.active{background:var(--panel-2);color:var(--text);box-shadow:inset 2px 0 0 var(--amber);}
+.nav svg{flex-shrink:0;opacity:.85;}
+
+.sidebar-foot{
+  position:absolute;
+  bottom:28px;
+  left:18px;
+  right:18px;
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  color:var(--text-dim);
+  line-height:1.6;
+  border-top:1px solid var(--line);
+  padding-top:14px;
+}
+
+/* ---------- MAIN ---------- */
+.main{flex:1;padding:40px 44px 60px;min-width:0;}
+.panel{display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.panel-head h1{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:30px;
+  margin:0 0 6px;
+}
+.panel-head p{
+  color:var(--text-dim);
+  font-size:14.5px;
+  max-width:640px;
+  margin:0 0 32px;
+}
+
+.grid{display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:start;}
+@media (max-width:920px){.grid{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:22px;
+}
+.card + .card{margin-top:18px;}
+.card h3{
+  font-family:var(--font-body);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  margin:0 0 16px;
+  font-weight:600;
+}
+
+/* toggle rows */
+.toggle-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid var(--line-soft);
+  gap:12px;
+}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:13.5px;}
+.toggle-label small{display:block;color:var(--text-dim);font-family:var(--font-mono);font-size:11px;margin-top:2px;}
+.switch{
+  position:relative;width:38px;height:22px;flex-shrink:0;
+}
+.switch input{opacity:0;width:0;height:0;}
+.slider-ui{
+  position:absolute;cursor:pointer;inset:0;background:var(--line);
+  border-radius:22px;transition:.15s;
+}
+.slider-ui:before{
+  content:"";position:absolute;height:16px;width:16px;left:3px;top:3px;
+  background:var(--text-dim);border-radius:50%;transition:.15s;
+}
+input:checked + .slider-ui{background:var(--teal);}
+input:checked + .slider-ui:before{transform:translateX(16px);background:var(--ink);}
+
+/* sliders */
+.field{margin-bottom:18px;}
+.field:last-child{margin-bottom:0;}
+.field-label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:13px;margin-bottom:8px;color:var(--text-dim);
+}
+.field-label b{color:var(--text);font-family:var(--font-mono);font-weight:500;}
+input[type=range]{
+  width:100%;height:4px;border-radius:2px;background:var(--line);
+  -webkit-appearance:none;appearance:none;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--amber);cursor:pointer;border:2px solid var(--ink);
+}
+input[type=range]::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;background:var(--amber);cursor:pointer;border:2px solid var(--ink);
+}
+input[type=number]{
+  width:90px;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  font-family:var(--font-mono);font-size:13px;padding:6px 8px;border-radius:5px;
+}
+select{
+  background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  font-family:var(--font-body);font-size:13px;padding:8px 10px;border-radius:6px;width:100%;
+}
+
+/* checkbox chip list (model select) */
+.chip-list{display:flex;flex-direction:column;gap:6px;}
+.chip{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;
+  background:var(--panel-2);border:1px solid var(--line);cursor:pointer;font-size:13px;
+}
+.chip input{accent-color:var(--amber);}
+.chip .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+/* outputs */
+.output-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px 28px;
+}
+.hero-number{
+  font-family:var(--font-mono);font-size:44px;font-weight:500;color:var(--amber);
+  letter-spacing:-0.5px;line-height:1;
+}
+.hero-caption{color:var(--text-dim);font-size:13px;margin-top:6px;}
+.breakdown{margin-top:22px;display:flex;flex-direction:column;gap:0;}
+.breakdown-row{
+  display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-soft);
+  font-size:13.5px;
+}
+.breakdown-row:last-child{border-bottom:none;font-weight:600;}
+.breakdown-row .val{font-family:var(--font-mono);}
+.chart-wrap{margin-top:24px;height:280px;position:relative;}
+.note{
+  font-size:12.5px;color:var(--text-dim);background:var(--panel-2);border:1px solid var(--line);
+  border-radius:8px;padding:12px 14px;margin-top:16px;line-height:1.55;
+}
+.note b{color:var(--text);}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.badge{
+  font-family:var(--font-mono);font-size:11px;padding:5px 9px;border-radius:5px;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
+}
+.badge.warn{border-color:var(--brick);color:var(--brick);}
+
+table.data{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px;}
+table.data th{
+  text-align:right;font-family:var(--font-mono);font-weight:500;color:var(--text-dim);
+  font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:8px 6px;border-bottom:1px solid var(--line);
+}
+table.data th:first-child, table.data td:first-child{text-align:left;}
+table.data td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line-soft);font-family:var(--font-mono);}
+
+/* service map */
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.svc-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;}
+.svc-card .tag{
+  display:inline-block;font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--ink);background:var(--teal);padding:2px 8px;border-radius:4px;margin-bottom:10px;
+}
+.svc-card.ai .tag{background:var(--amber);}
+.svc-card.pay .tag{background:var(--brick);color:#fff;}
+.svc-card h4{font-family:var(--font-display);font-size:17px;margin:0 0 8px;font-weight:600;}
+.svc-card p{font-size:13px;color:var(--text-dim);margin:0 0 10px;line-height:1.55;}
+.svc-card .tip{font-size:12.5px;border-top:1px solid var(--line-soft);padding-top:10px;color:var(--text);}
+.svc-card .tip b{color:var(--amber);font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px;}
+
+h2.section{font-family:var(--font-display);font-size:19px;font-weight:600;margin:36px 0 14px;}
+h2.section:first-of-type{margin-top:0;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="brand">Cost Topology</div>
+    <span class="brand-sub">zero-CAPEX venture simulator · Sep 2026 rates</span>
+    <ul class="nav">
+      <li><button class="tab-btn active" data-tab="baseline">
+        <svg width="15" height="15" viewBox="0 0 15 15"><line x1="1" y1="7.5" x2="14" y2="7.5" stroke="currentColor" stroke-width="1.4"/></svg>
+        Day-One Baseline
+      </button></li>
+      <li><button class="tab-btn" data-tab="scale">
+        <svg width="15" height="15" viewBox="0 0 15 15"><path d="M1 13 L1 10 L5 10 L5 6 L9 6 L9 2 L14 2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        Scale Simulator
+      </button></li>
+      <li><button class="tab-btn" data-tab="ailab">
+        <svg width="15" height="15" viewBox="0 0 15 15"><path d="M1 13 Q 7 13 14 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        AI Token Lab
+      </button></li>
+      <li><button class="tab-btn" data-tab="map">
+        <svg width="15" height="15" viewBox="0 0 15 15"><circle cx="3" cy="3" r="1.6" fill="currentColor"/><circle cx="12" cy="4" r="1.6" fill="currentColor"/><circle cx="7" cy="12" r="1.6" fill="currentColor"/><line x1="3" y1="3" x2="12" y2="4" stroke="currentColor" stroke-width="1"/><line x1="3" y1="3" x2="7" y2="12" stroke="currentColor" stroke-width="1"/><line x1="12" y1="4" x2="7" y2="12" stroke="currentColor" stroke-width="1"/></svg>
+        Service Map
+      </button></li>
+    </ul>
+    <div class="sidebar-foot">
+      All figures computed live from published Sep&nbsp;2026 rate cards. Model, not invoice — verify against vendor pricing pages before budgeting.
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ============ TAB 1: BASELINE ============ -->
+    <section class="panel active" id="panel-baseline">
+      <div class="panel-head">
+        <h1>Day-One Baseline</h1>
+        <p>Toggle the tools a launch actually needs. Free tiers stay at $0 until a plan requires the paid tier for commercial use — flip Vercel or Cursor off to see how much of the floor they alone account for.</p>
+      </div>
+      <div class="grid">
+        <div>
+          <div class="card">
+            <h3>Build &amp; Hosting</h3>
+            <div class="toggle-row">
+              <div class="toggle-label">Cursor Pro<small>$20/mo · build tooling</small></div>
+              <label class="switch"><input type="checkbox" checked class="b-toggle" data-cost="20" data-key="cursor"><span class="slider-ui"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">Vercel Pro<small>$20/mo · required for commercial use</small></div>
+              <label class="switch"><input type="checkbox" checked class="b-toggle" data-cost="20" data-key="vercel"><span class="slider-ui"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">Domain<small>~$2/mo amortized</small></div>
+              <label class="switch"><input type="checkbox" checked class="b-toggle" data-cost="2" data-key="domain"><span class="slider-ui"></span></label>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Runtime (free tier)</h3>
+            <div class="toggle-row">
+              <div class="toggle-label">Supabase<small>$0 · ≤50,000 MAU</small></div>
+              <label class="switch"><input type="checkbox" checked class="b-toggle" data-cost="0" data-key="supabase"><span class="slider-ui"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">Upstash Redis<small>$0 · ≤500,000 commands/mo</small></div>
+              <label class="switch"><input type="checkbox" checked class="b-toggle" data-cost="0" data-key="upstash"><span class="slider-ui"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">Resend<small>$0 · ≤3,000 emails/mo</small></div>
+              <label class="switch"><input type="checkbox" checked class="b-toggle" data-cost="0" data-key="resend"><span class="slider-ui"></span></label>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Payments (variable — not fixed)</h3>
+            <div class="field">
+              <div class="field-label">Monthly revenue <b id="rev-out">$5,000</b></div>
+              <input type="range" id="rev" min="0" max="50000" step="500" value="5000">
+            </div>
+            <div class="field">
+              <div class="field-label">Avg. transaction size <b id="atv-out">$25</b></div>
+              <input type="range" id="atv" min="5" max="500" step="5" value="25">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="output-card">
+            <div class="hero-number" id="baseline-total">$0</div>
+            <div class="hero-caption">Fixed monthly floor (excludes Stripe — that's a % of revenue, not a subscription)</div>
+            <div class="breakdown" id="baseline-breakdown"></div>
+            <div class="note"><b>Stripe fee at current inputs:</b> <span id="stripe-fee">—</span> (2.9% + $0.30 per transaction, on <span id="stripe-txns">—</span> estimated transactions/mo)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 2: SCALE ============ -->
+    <section class="panel" id="panel-scale">
+      <div class="panel-head">
+        <h1>Scale Simulator</h1>
+        <p>Infrastructure COGS as a function of Monthly Active Users. Each vendor free-tiers, then steps, then slopes — drag the MAU control to find your own step.</p>
+      </div>
+      <div class="grid">
+        <div>
+          <div class="card">
+            <h3>Traffic</h3>
+            <div class="field">
+              <div class="field-label">Monthly Active Users <b id="mau-out">100,000</b></div>
+              <input type="range" id="mau" min="0" max="100" step="1" value="66">
+            </div>
+            <div class="field">
+              <div class="field-label">Emails / MAU / mo <b id="epm-out">3</b></div>
+              <input type="range" id="epm" min="0" max="15" step="1" value="3">
+            </div>
+            <div class="field">
+              <div class="field-label">Redis commands / MAU / mo <b id="cpm-out">150</b></div>
+              <input type="range" id="cpm" min="0" max="500" step="10" value="150">
+            </div>
+          </div>
+          <div class="card">
+            <h3>Optimization</h3>
+            <div class="toggle-row">
+              <div class="toggle-label">Auto-select cheapest Resend tier<small>switches Pro→Scale where it's cheaper</small></div>
+              <label class="switch"><input type="checkbox" id="opt-resend" checked><span class="slider-ui"></span></label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="output-card">
+            <div class="hero-number" id="scale-total">$0</div>
+            <div class="hero-caption">Total infrastructure COGS at current MAU</div>
+            <div class="breakdown" id="scale-breakdown"></div>
+            <div class="chart-wrap"><canvas id="scaleChart"></canvas></div>
+            <div class="note">Curve holds emails/MAU and commands/MAU fixed while MAU varies, so you can see exactly where each vendor's free tier ends. The current MAU is marked on the curve.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 3: AI LAB ============ -->
+    <section class="panel" id="panel-ailab">
+      <div class="panel-head">
+        <h1>AI Token Lab</h1>
+        <p>Cumulative cost of a growing conversation, per provider, with context-tier surcharges applied automatically once a turn's context crosses that model's long-context threshold.</p>
+      </div>
+      <div class="grid">
+        <div>
+          <div class="card">
+            <h3>Models</h3>
+            <div class="chip-list" id="model-chips"></div>
+          </div>
+          <div class="card">
+            <h3>Conversation shape</h3>
+            <div class="field">
+              <div class="field-label">Turns (N) <b id="turns-out">1000</b></div>
+              <input type="range" id="turns" min="10" max="2000" step="10" value="1000">
+            </div>
+            <div class="field">
+              <div class="field-label">Base prompt B (tokens) <b id="bval-out">200</b></div>
+              <input type="range" id="bval" min="50" max="2000" step="50" value="200">
+            </div>
+            <div class="field">
+              <div class="field-label">Context growth C /turn <b id="cval-out">900</b></div>
+              <input type="range" id="cval" min="100" max="3000" step="50" value="900">
+            </div>
+            <div class="field">
+              <div class="field-label">Output O /turn <b id="oval-out">700</b></div>
+              <input type="range" id="oval" min="50" max="3000" step="50" value="700">
+            </div>
+          </div>
+          <div class="card">
+            <h3>Caching</h3>
+            <div class="toggle-row">
+              <div class="toggle-label">Enable prompt caching<small>writes new turns, reads prior context from cache</small></div>
+              <label class="switch"><input type="checkbox" id="cache-toggle"><span class="slider-ui"></span></label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="output-card">
+            <div class="chart-wrap" style="height:320px;"><canvas id="aiChart"></canvas></div>
+            <div class="badge-row" id="tier-badges"></div>
+            <table class="data" id="ai-table"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 4: SERVICE MAP ============ -->
+    <section class="panel" id="panel-map">
+      <div class="panel-head">
+        <h1>Service Map</h1>
+        <p>How each vendor's billing logic touches the others — and the specific setting worth checking before it costs you.</p>
+      </div>
+
+      <h2 class="section">Build &amp; delivery</h2>
+      <div class="svc-grid">
+        <div class="svc-card">
+          <span class="tag">Hosting</span>
+          <h4>Vercel</h4>
+          <p>Gateway for every request. Fluid Compute's Active CPU meter excludes I/O wait entirely — a slow AI or DB call doesn't burn CPU billing while it waits.</p>
+          <div class="tip"><b>Watch for</b>Provisioned Memory still bills for the full wait, unlike Active CPU. Streaming responses shortens that memory-duration cost — the AI provider's own token cost is unaffected either way.</div>
+        </div>
+        <div class="svc-card">
+          <span class="tag">Build</span>
+          <h4>Cursor</h4>
+          <p>Pro's $20 bundles a $20 "Other Models" allowance drawn from the same provider APIs priced in the AI Token Lab tab.</p>
+          <div class="tip"><b>Watch for</b>Heavy agentic sessions on a flagship model exhaust the allowance fast. Route boilerplate to a cheap model and save flagship calls for architecture decisions.</div>
+        </div>
+      </div>
+
+      <h2 class="section">Runtime</h2>
+      <div class="svc-grid">
+        <div class="svc-card">
+          <span class="tag">Database</span>
+          <h4>Supabase</h4>
+          <p>Free to 50,000 MAU; Pro ($25/mo) includes 100,000 MAU plus a $10 compute credit that only covers the Micro instance.</p>
+          <div class="tip"><b>Watch for</b>The Scale Simulator tab isolates the MAU meter. Compute-tier upgrades, storage, and egress overage are separate lines that grow with real traffic, not account count — budget for them past ~500K MAU.</div>
+        </div>
+        <div class="svc-card">
+          <span class="tag">Cache</span>
+          <h4>Upstash Redis</h4>
+          <p>Free to 500,000 commands/mo. Upgrading to Pay-as-you-go does <b style="color:var(--text)">not</b> carry the free allowance forward — the full volume bills at $0.20/100K.</p>
+          <div class="tip"><b>Watch for</b>Steady traffic above the free tier is usually cheaper on a Fixed plan (from $10/mo) than PAYG. PAYG wins for bursty or idle-heavy workloads only.</div>
+        </div>
+        <div class="svc-card">
+          <span class="tag">Email</span>
+          <h4>Resend</h4>
+          <p>Free to 3,000 emails/mo; Pro ($20–$35) includes up to 100,000; overage is a flat $0.90/1,000.</p>
+          <div class="tip"><b>Watch for</b>Scale's lower overage ($0.90 down to $0.46/1,000) looks like a discount, but its higher base fee means Pro + overage stays cheaper in raw price until ~455–460K emails/mo. The toggle above computes the real minimum, not a round-number rule.</div>
+        </div>
+      </div>
+
+      <h2 class="section">AI inference</h2>
+      <div class="svc-grid">
+        <div class="svc-card ai">
+          <span class="tag">Provider</span>
+          <h4>Anthropic (Claude)</h4>
+          <p>Flat per-token rate with no long-context surcharge on Sonnet/Opus/Haiku. Cache writes cost 1.25× the base input rate; only reused reads earn the 0.1× discount.</p>
+          <div class="tip"><b>Watch for</b>Caching a turn that's never re-read is a net loss. It pays off only in conversations that revisit the same prefix repeatedly — see the caching toggle in AI Token Lab.</div>
+        </div>
+        <div class="svc-card ai">
+          <span class="tag">Provider</span>
+          <h4>OpenAI (GPT-5.6)</h4>
+          <p>Sol's promotional $4/$20 rate holds only through Nov 21, 2026, and doubles past a ~272K-token context threshold.</p>
+          <div class="tip"><b>Watch for</b>An unbounded-history architecture crosses that threshold silently mid-conversation. The AI Token Lab tab marks the exact turn it happens for your B/C settings.</div>
+        </div>
+        <div class="svc-card ai">
+          <span class="tag">Provider</span>
+          <h4>Google (Gemini)</h4>
+          <p>3.1 Pro doubles input/output past 200K context. The whole 3.x family shares 5,000 free Search-grounding requests/month, then $14/1,000.</p>
+          <div class="tip"><b>Watch for</b>Flash-tier models (3.8 Flash, 3.1 Flash-Lite) don't carry the long-context surcharge — the cheapest place to route high-volume, short-context turns.</div>
+        </div>
+      </div>
+
+      <h2 class="section">Payments</h2>
+      <div class="svc-grid">
+        <div class="svc-card pay">
+          <span class="tag">Payments</span>
+          <h4>Stripe</h4>
+          <p>2.9% + $0.30 per transaction — the only line in this whole stack that scales with revenue and order value rather than MAU or token count.</p>
+          <div class="tip"><b>Watch for</b>Many small transactions let the flat $0.30 dominate the effective rate. Model this separately from infrastructure COGS; it doesn't share a growth driver with anything else here.</div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PRICING MODEL — mirrors the published Sep 2026 rate cards
+   ============================================================ */
+
+const MODELS = {
+  "claude-sonnet-5":   { name:"Claude Sonnet 5",  color:"#D98E4A", tiers:[{max:Infinity, in:2.00, cr:0.20, cw:2.50, out:10.00}] },
+  "claude-opus-5":      { name:"Claude Opus 5",    color:"#E7B27A", tiers:[{max:Infinity, in:5.00, cr:0.50, cw:6.25, out:25.00}] },
+  "claude-haiku-4-5":   { name:"Claude Haiku 4.5", color:"#C97A2E", tiers:[{max:Infinity, in:1.00, cr:0.10, cw:1.25, out:5.00}] },
+  "gpt-5.6-terra":       { name:"GPT-5.6 Terra",    color:"#8FA0A8", tiers:[{max:Infinity, in:2.00, cr:0.20, cw:2.50, out:12.00}] },
+  "gpt-5.6-sol":         { name:"GPT-5.6 Sol",      color:"#5FA8A0", tiers:[{max:272000, in:4.00, cr:0.40, cw:5.00, out:20.00},{max:Infinity, in:8.00, cr:0.80, cw:10.00, out:30.00}] },
+  "gemini-3.1-pro":      { name:"Gemini 3.1 Pro",   color:"#C75146", tiers:[{max:200000, in:2.00, cr:0.20, cw:2.00, out:12.00},{max:Infinity, in:4.00, cr:0.40, cw:4.00, out:18.00}] },
+  "gemini-3.8-flash":    { name:"Gemini 3.8 Flash", color:"#4C8C85", tiers:[{max:Infinity, in:0.75, cr:0.075, cw:0.75, out:3.75}] },
+  "gemini-3.1-flash-lite":{ name:"Gemini 3.1 Flash-Lite", color:"#3E6E68", tiers:[{max:Infinity, in:0.25, cr:0.025, cw:0.25, out:1.50}] },
+};
+
+function tierFor(model, ctx){
+  const t = MODELS[model].tiers;
+  for(const tier of t){ if(ctx <= tier.max) return tier; }
+  return t[t.length-1];
+}
+
+function firstCrossoverTurn(model, B, C){
+  const t = MODELS[model].tiers;
+  if(t.length < 2) return null;
+  const threshold = t[0].max;
+  // ctx(i) = B + (i-1)*C > threshold  =>  i > (threshold-B)/C + 1
+  const i = Math.floor((threshold - B)/C) + 2;
+  return i > 0 ? i : 1;
+}
+
+function costSeries(model, N, B, C, O, cached){
+  const pts = [];
+  let total = 0;
+  for(let i=1;i<=N;i++){
+    const ctx = B + (i-1)*C;
+    const tier = tierFor(model, ctx);
+    if(cached){
+      const newTok = (i===1) ? B : C;
+      const readTok = ctx - newTok;
+      total += newTok/1e6*tier.cw + readTok/1e6*tier.cr + O/1e6*tier.out;
+    } else {
+      total += ctx/1e6*tier.in + O/1e6*tier.out;
+    }
+    pts.push(total);
+  }
+  return {points: pts, total};
+}
+
+function fmt(v){
+  if(v >= 1000) return "$" + v.toLocaleString(undefined,{maximumFractionDigits:0});
+  if(v >= 1) return "$" + v.toFixed(2);
+  return "$" + v.toFixed(3);
+}
+function fmtInt(v){ return v.toLocaleString(undefined,{maximumFractionDigits:0}); }
+
+/* ============================================================
+   TAB NAV
+   ============================================================ */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+    if(btn.dataset.tab==="scale") renderScale();
+    if(btn.dataset.tab==="ailab") renderAI();
+  });
+});
+
+/* ============================================================
+   TAB 1: BASELINE
+   ============================================================ */
+function renderBaseline(){
+  let total = 0;
+  const rows = [];
+  document.querySelectorAll(".b-toggle").forEach(t=>{
+    const cost = parseFloat(t.dataset.cost);
+    if(t.checked){
+      total += cost;
+      rows.push([t.closest(".toggle-row").querySelector(".toggle-label").firstChild.textContent, cost]);
+    }
+  });
+  document.getElementById("baseline-total").textContent = fmt(total) + "/mo";
+  document.getElementById("baseline-breakdown").innerHTML = rows.map(r=>
+    `<div class="breakdown-row"><span>${r[0]}</span><span class="val">${r[1]===0?'$0':'$'+r[1]}</span></div>`
+  ).join("") + `<div class="breakdown-row"><span>Total fixed floor</span><span class="val">${fmt(total)}</span></div>`;
+
+  const rev = parseFloat(document.getElementById("rev").value);
+  const atv = parseFloat(document.getElementById("atv").value);
+  document.getElementById("rev-out").textContent = "$" + rev.toLocaleString();
+  document.getElementById("atv-out").textContent = "$" + atv;
+  const txns = atv>0 ? rev/atv : 0;
+  const fee = rev*0.029 + txns*0.30;
+  document.getElementById("stripe-fee").textContent = fmt(fee) + "/mo";
+  document.getElementById("stripe-txns").textContent = fmtInt(Math.round(txns));
+}
+document.querySelectorAll(".b-toggle").forEach(el=>el.addEventListener("change", renderBaseline));
+document.getElementById("rev").addEventListener("input", renderBaseline);
+document.getElementById("atv").addEventListener("input", renderBaseline);
+renderBaseline();
+
+/* ============================================================
+   TAB 2: SCALE
+   ============================================================ */
+function mauFromSlider(v){
+  // log scale from 1,000 to 1,000,000 over 0-100
+  const min = Math.log10(1000), max = Math.log10(1000000);
+  return Math.round(Math.pow(10, min + (max-min)*(v/100)));
+}
+
+function supabaseCost(mau){
+  if(mau <= 50000) return 0;
+  if(mau <= 100000) return 25;
+  return 25 + (mau-100000)*0.00325;
+}
+function upstashCost(mau, cpm){
+  const commands = mau*cpm;
+  if(commands <= 500000) return 0;
+  return commands/100000*0.20;
+}
+function resendCost(mau, epm, optimize){
+  const emails = mau*epm;
+  if(emails <= 3000) return 0;
+  if(!optimize){
+    if(emails <= 50000) return 20;
+    return 20 + Math.ceil((emails-50000)/1000)*0.90;
+  }
+  // published Scale tiers, pick cheapest that covers volume
+  const tiers = [
+    {cap:50000, price:20, over:0.90},
+    {cap:100000, price:35, over:0.90},
+    {cap:100000, price:90, over:0.90},
+    {cap:200000, price:160, over:0.80},
+    {cap:500000, price:350, over:0.70},
+    {cap:1000000, price:650, over:0.65},
+    {cap:1500000, price:825, over:0.52},
+    {cap:2500000, price:1150, over:0.46},
+  ];
+  if(emails <= 3000) return 0;
+  let best = Infinity;
+  for(const t of tiers){
+    const cost = emails<=t.cap ? t.price : t.price + Math.ceil((emails-t.cap)/1000)*t.over;
+    if(cost < best) best = cost;
+  }
+  return best;
+}
+
+let scaleChart;
+function renderScale(){
+  const sVal = parseInt(document.getElementById("mau").value);
+  const mau = mauFromSlider(sVal);
+  const epm = parseInt(document.getElementById("epm").value);
+  const cpm = parseInt(document.getElementById("cpm").value);
+  const optimize = document.getElementById("opt-resend").checked;
+
+  document.getElementById("mau-out").textContent = fmtInt(mau);
+  document.getElementById("epm-out").textContent = epm;
+  document.getElementById("cpm-out").textContent = cpm;
+
+  const sb = supabaseCost(mau), up = upstashCost(mau,cpm), rs = resendCost(mau,epm,optimize);
+  const total = sb+up+rs;
+  document.getElementById("scale-total").textContent = fmt(total) + "/mo";
+  document.getElementById("scale-breakdown").innerHTML = `
+    <div class="breakdown-row"><span>Supabase</span><span class="val">${fmt(sb)}</span></div>
+    <div class="breakdown-row"><span>Upstash Redis</span><span class="val">${fmt(up)}</span></div>
+    <div class="breakdown-row"><span>Resend</span><span class="val">${fmt(rs)}</span></div>
+    <div class="breakdown-row"><span>Total COGS</span><span class="val">${fmt(total)}</span></div>
+  `;
+
+  // build curve across MAU range
+  const labels = [], sbArr=[], upArr=[], rsArr=[], totArr=[];
+  for(let v=0; v<=100; v+=4){
+    const m = mauFromSlider(v);
+    labels.push(fmtInt(m));
+    const s=supabaseCost(m), u=upstashCost(m,cpm), r=resendCost(m,epm,optimize);
+    sbArr.push(s); upArr.push(u); rsArr.push(r); totArr.push(s+u+r);
+  }
+
+  const ctx = document.getElementById("scaleChart").getContext("2d");
+  if(scaleChart) scaleChart.destroy();
+  scaleChart = new Chart(ctx, {
+    type:"line",
+    data:{
+      labels,
+      datasets:[
+        {label:"Total COGS", data:totArr, borderColor:"#D98E4A", backgroundColor:"rgba(217,142,74,0.08)", fill:true, tension:0.15, pointRadius:0, borderWidth:2.5},
+        {label:"Supabase", data:sbArr, borderColor:"#5FA8A0", pointRadius:0, borderWidth:1.5, borderDash:[3,3]},
+        {label:"Upstash", data:upArr, borderColor:"#8FA0A8", pointRadius:0, borderWidth:1.5, borderDash:[3,3]},
+        {label:"Resend", data:rsArr, borderColor:"#C75146", pointRadius:0, borderWidth:1.5, borderDash:[3,3]},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"index", intersect:false},
+      plugins:{ legend:{ labels:{color:"#8FA0A8", font:{family:"IBM Plex Mono", size:10.5}} } },
+      scales:{
+        x:{ ticks:{color:"#8FA0A8", maxTicksLimit:8, font:{family:"IBM Plex Mono", size:10}}, grid:{color:"#222C31"} },
+        y:{ ticks:{color:"#8FA0A8", font:{family:"IBM Plex Mono", size:10}, callback:v=>"$"+v.toLocaleString()}, grid:{color:"#222C31"} }
+      }
+    }
+  });
+}
+["mau","epm","cpm"].forEach(id=>document.getElementById(id).addEventListener("input", renderScale));
+document.getElementById("opt-resend").addEventListener("change", renderScale);
+
+/* ============================================================
+   TAB 3: AI LAB
+   ============================================================ */
+const chipList = document.getElementById("model-chips");
+const defaultSelected = ["claude-sonnet-5","gpt-5.6-sol","gemini-3.1-pro"];
+Object.keys(MODELS).forEach(key=>{
+  const m = MODELS[key];
+  const div = document.createElement("label");
+  div.className = "chip";
+  div.innerHTML = `<input type="checkbox" class="model-chk" value="${key}" ${defaultSelected.includes(key)?"checked":""}>
+    <span class="dot" style="background:${m.color}"></span> ${m.name}`;
+  chipList.appendChild(div);
+});
+
+let aiChart;
+function renderAI(){
+  const N = parseInt(document.getElementById("turns").value);
+  const B = parseInt(document.getElementById("bval").value);
+  const C = parseInt(document.getElementById("cval").value);
+  const O = parseInt(document.getElementById("oval").value);
+  const cached = document.getElementById("cache-toggle").checked;
+
+  document.getElementById("turns-out").textContent = N;
+  document.getElementById("bval-out").textContent = B;
+  document.getElementById("cval-out").textContent = C;
+  document.getElementById("oval-out").textContent = O;
+
+  const selected = Array.from(document.querySelectorAll(".model-chk:checked")).map(c=>c.value);
+  const sampleCount = 50;
+  const sampleTurns = [];
+  for(let k=0;k<sampleCount;k++){
+    sampleTurns.push(Math.max(1, Math.round((k+1)*N/sampleCount)));
+  }
+
+  const datasets = [];
+  const tableRows = [];
+  const badges = [];
+
+  selected.forEach(key=>{
+    const full = costSeries(key, N, B, C, O, cached);
+    const data = sampleTurns.map(t=> full.points[t-1] !== undefined ? full.points[t-1] : costSeries(key,t,B,C,O,cached).total);
+    datasets.push({
+      label: MODELS[key].name,
+      data,
+      borderColor: MODELS[key].color,
+      backgroundColor: "transparent",
+      borderWidth: 2.2,
+      pointRadius: 0,
+      tension: 0.1
+    });
+    tableRows.push([MODELS[key].name, fmt(full.total)]);
+
+    const crossover = firstCrossoverTurn(key, B, C);
+    if(crossover && crossover <= N && !cached){
+      badges.push(`<span class="badge warn">${MODELS[key].name}: long-context tier from turn ${crossover}</span>`);
+    }
+  });
+
+  const ctx = document.getElementById("aiChart").getContext("2d");
+  if(aiChart) aiChart.destroy();
+  aiChart = new Chart(ctx, {
+    type:"line",
+    data:{ labels: sampleTurns, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"index", intersect:false},
+      plugins:{ legend:{ labels:{color:"#8FA0A8", font:{family:"IBM Plex Mono", size:10.5}} } },
+      scales:{
+        x:{ title:{display:true, text:"Turn", color:"#8FA0A8", font:{family:"IBM Plex Mono", size:10.5}}, ticks:{color:"#8FA0A8", maxTicksLimit:8, font:{family:"IBM Plex Mono", size:10}}, grid:{color:"#222C31"} },
+        y:{ title:{display:true, text:"Cumulative cost ($)", color:"#8FA0A8", font:{family:"IBM Plex Mono", size:10.5}}, ticks:{color:"#8FA0A8", font:{family:"IBM Plex Mono", size:10}, callback:v=>"$"+v.toLocaleString()}, grid:{color:"#222C31"} }
+      }
+    }
+  });
+
+  document.getElementById("tier-badges").innerHTML = badges.join("") || `<span class="badge">no model in this selection crosses its long-context tier at N=${N}</span>`;
+  document.getElementById("ai-table").innerHTML = `
+    <tr><th>Model</th><th>Total cost at N=${N}${cached?" (cached)":""}</th></tr>
+    ${tableRows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}
+  `;
+}
+["turns","bval","cval","oval"].forEach(id=>document.getElementById(id).addEventListener("input", renderAI));
+document.getElementById("cache-toggle").addEventListener("change", renderAI);
+document.addEventListener("change", e=>{ if(e.target.classList.contains("model-chk")) renderAI(); });
+
+renderScale();
+renderAI();
+</script>
+</body>
+</html>
