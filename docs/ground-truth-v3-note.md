@@ -1,1 +1,0 @@
-Ground-truth hardening is being developed on the research/ground-truth-v3 branch. See docs/ground-truth-contract.md and the dated pricing snapshot for evidence status.
