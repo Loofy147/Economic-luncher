@@ -5,16 +5,15 @@ def test_claude_sonnet_5_no_long_context_tier():
     assert first_crossover_turn("claude-sonnet-5", 200, 900) is None
 
 
-def test_gpt_5_6_sol_crossover_turn():
+def test_gpt_5_6_sol_crossover_boundary():
     assert first_crossover_turn("gpt-5.6-sol", 200, 900) == 304
 
 
-def test_gemini_3_1_pro_crossover_turn():
-    assert first_crossover_turn("gemini-3.1-pro", 200, 900) == 224
+def test_gemini_3_1_pro_preview_crossover_boundary():
+    assert first_crossover_turn("gemini-3.1-pro-preview", 200, 900) == 224
 
 
 def test_quadratic_growth_claude_sonnet_5():
-    # cost(N) should grow faster than linearly -- ratio cost(1000)/cost(100) should exceed 10 (linear bound)
     c100 = conversation_cost("claude-sonnet-5", 100, 200, 900, 700, cached=False)["total"]
     c1000 = conversation_cost("claude-sonnet-5", 1000, 200, 900, 700, cached=False)["total"]
     assert c1000 / c100 > 10
@@ -45,5 +44,4 @@ def test_bounded_window_beats_unbounded_at_high_n():
 def test_bounded_window_is_linear_not_quadratic():
     b100 = bounded_window_cost("claude-sonnet-5", 100, 200, 900, 700, 20)["total"]
     b1000 = bounded_window_cost("claude-sonnet-5", 1000, 200, 900, 700, 20)["total"]
-    # linear growth => 10x turns should give roughly 10x cost, not 100x
     assert b1000 / b100 < 15

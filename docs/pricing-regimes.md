@@ -1,16 +1,28 @@
 # Pricing Regimes Reference
 
-A quick-reference for every threshold this engine tracks. "Regime" = a priced tier; crossing a threshold changes the *rate*, not just the *quantity billed*.
+A **regime** is a pricing state defined by a vendor's published plan, threshold, or effective date. Crossing a regime boundary may change the rate, base fee, included quota, or feasible capabilities.
 
-| Vendor | Metric | Threshold | What changes |
-|---|---|---|---|
-| Supabase | MAU | 50,000 | free -> $25/mo base |
-| Supabase | MAU | 100,000 | flat $25 -> $25 + $0.00325/MAU overage |
-| Upstash | commands/mo | 500,000 | free -> PAYG or Fixed (no free carry-over) |
-| Resend | emails/mo | 3,000 / 50,000 / 100,000 / 200,000 / 500,000 / 1M / 1.5M / 2.5M | each step changes base fee and overage rate; **true Pro-vs-Scale price crossover is ~455-460K emails/mo**, not the 100-200K figure often assumed |
-| GPT-5.6 Sol | context tokens (single request) | 272,000 | input/cache ~2x, output ~1.5x on the *entire* request |
-| Gemini 3.1 Pro | context tokens (single request) | 200,000 | input/output/cache roughly double |
-| Gemini 3.8 Flash | calendar date | 2027-01-01 | intro rate ($0.75/$3.75) -> standard rate ($1.50/$7.50) |
-| GPT-5.6 Sol | calendar date | 2026-11-21 | promotional rate ($4/$20) -> standard rate ($5/$30), unless extended |
+| Provider / model | Metric | Boundary | Effect |
+|---|---|---:|---|
+| Supabase | MAU | 50,000 | Free allowance ends |
+| Supabase | MAU | 100,000 | Pro included MAU ends; $0.00325/MAU overage begins |
+| Upstash | commands/storage/bandwidth | plan limits | Free, PAYG and Fixed are alternative regimes with different constraints |
+| Resend | emails/mo | 3,000 / 50,000 / 100,000 and higher published tiers | Base fee, overage rate, or plan capabilities change |
+| GPT-5.6 Sol | input context tokens | 272,000 | Full request uses documented long-context multiplier: input 2x, output 1.5x |
+| Gemini 3.1 Pro Preview | input context tokens | 200,000 | Input/output pricing changes from $2/$12 to $4/$18 per M tokens |
+| Gemini 3.7 Flash | calendar date | 2027-01-01 | Introductory $0.75/$3.75 -> standard $1.50/$7.50 |
+| GPT-5.6 Sol | calendar date | 2026-11-21 | Promotional $4/$20 pricing is documented through this date; re-verify afterward |
 
-The two calendar-based thresholds matter as much as the usage-based ones: a report generated today can go stale on a fixed date even if traffic never changes.
+## Boundary policy
+
+Threshold tests must evaluate the values immediately below, at, and immediately above the threshold. For bucketed billing, bucket transitions must also be tested.
+
+A plan crossover is not a ground-truth fact merely because it appears in analyst prose. It must be recomputed from the versioned plan definitions and relevant constraints.
+
+The engine should expose:
+
+- current regime
+- next regime
+- distance to boundary
+- assumptions driving the boundary
+- whether the boundary is price-driven, capability-driven, or date-driven
