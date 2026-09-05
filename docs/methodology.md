@@ -2,26 +2,56 @@
 
 ## Layer model
 
-`Source Data -> Normalized Pricing -> Workload -> Cost Model -> Regime Detection -> Unit Economics -> Report`
+`Vendor Evidence -> Canonical Pricing Snapshot -> Billing Semantics -> Workload -> Cost Model -> Regime Detection -> Unit Economics -> Decision`
 
-- **Source data**: vendor pricing pages, captured with a date and URL in `research/pricing_snapshots/`.
-- **Normalized pricing**: `configs/vendors/*.json` -- one file per vendor, machine-readable, no number embedded in code.
-- **Workload**: `configs/workloads/*.json` -- the ratios that turn a raw MAU count into emails, Redis commands, AI-active users, and turns/user. Swapping the workload file changes every downstream number without touching the pricing model.
-- **Cost model**: `src/economics/infrastructure`, `src/economics/inference`, `src/economics/payments` -- pure functions from (usage, pricing config) to dollars. No global state, no hidden constants.
-- **Regime detection**: `src/economics/topology` -- answers "what tier are we in, and how far to the next one" for every metered dimension (Supabase MAU tier, Resend email tier, a model's long-context threshold).
-- **Unit economics**: `src/economics/unit_economics` -- rolls the three COGS categories into COGS/MAU, AI COGS/AI-user, gross margin, and identifies the dominant cost driver.
-- **Report**: `src/economics/reporting` -- assembles the full field set for a named scenario.
+- **Vendor evidence**: first-party pricing/model documentation with date and source URL.
+- **Canonical pricing**: `configs/vendors/*.json`; model aliases are not accepted as identity.
+- **Billing semantics**: free-tier rules, overage buckets, threshold pricing, cache writes/reads, and plan constraints.
+- **Workload**: explicit assumptions converting MAU into resource consumption.
+- **Cost model**: deterministic calculations from versioned pricing + workload + billing rules.
+- **Regime detection**: active regime, next boundary, and distance to boundary.
+- **Unit economics**: direct COGS/user, AI COGS/AI-user, contribution margin, gross margin, and cost-driver attribution.
+- **Decision**: cheapest feasible plan/architecture, not simply cheapest listed plan.
 
-## What "Price," "Cost," "COGS," and "Economic Risk" mean here
+## Evidence states
 
-- **Price**: the published per-unit rate (`configs/vendors/*.json`).
-- **Cost**: price applied to an actual workload (`infrastructure_cogs()`, `conversation_cost()`).
-- **COGS**: the subset of cost directly attributable to serving a user or request -- excludes fixed build tooling like Cursor, which is a workflow cost, not a per-user cost.
-- **Economic risk**: not separately quantified in this version. The `next_thresholds` field in every report is the raw material for it -- distance to the next priced regime is a proxy for how exposed a scenario is to a sudden step-change in COGS. A dedicated `risk` module (Monte Carlo over vendor-price-change and cache-hit-rate assumptions) is a natural next extension, not yet built.
+`verified`, `verified_partial`, `verified_with_semantics_caveat`, `verified_baseline`, `derived`, and `unknown` are defined in `docs/ground-truth-contract.md`.
 
-## Known simplifications
+## AI context economics
 
-- Supabase COGS covers only the Auth/MAU meter. Compute-tier upgrades, storage overage, and egress overage are real costs at scale and are **not** included -- see `docs/pricing-regimes.md`.
-- The AI cost model assumes a single conversation shape (constant per-turn output, linear per-turn context growth) per workload. Real traffic has a distribution of conversation lengths; this engine models the mean case, not the distribution.
-- GPT-5.6 Sol's long-context multiplier is a derived estimate (see `research/pricing_snapshots/2026-09-05.json` -> `known_unknowns`), not a vendor-published number at the current promotional rate.
-- "Economic Risk" (vendor price-change exposure, cache-hit-rate variance) is described conceptually above but not yet implemented as a scored output.
+With fixed context growth C and full-history replay:
+
+\[
+I(N)=BN+C\frac{N(N-1)}2=O(N^2)
+\]
+
+With bounded retention K:
+
+\[
+I(N)=\sum_{i=1}^{N}[B+\min(i-1,K)C]=O(N)
+\]
+
+This is a conditional architectural result, not a universal property of LLM APIs.
+
+## Thresholds
+
+Explicit usage thresholds must be tested immediately below, at, and immediately above the boundary. Bucketed billing must also test the bucket transition.
+
+## Plan optimization
+
+\[
+p^*=\arg\min_{p\in P_{feasible}}Cost(p)
+\]
+
+Feasibility includes storage, bandwidth, region, throughput, domains, SLA, and other product/workload constraints.
+
+## Reproducibility
+
+A report records the pricing snapshot/date, canonical model/plan ID, workload, context policy, cache policy, scenario, and calculation version. Historical snapshots are immutable; live research creates a new snapshot.
+
+## Known limitations
+
+- Supabase compute/storage/egress are outside the baseline MAU model.
+- Vercel variable cost requires a resource/workload trace; MAU alone is insufficient.
+- OpenAI compound cache-write + long-context behavior remains explicitly marked as a semantic caveat until independently confirmed.
+- Production traffic needs distributions of turns, context sizes, output lengths, cache hits, and tool calls; mean scenarios are not production forecasts.
