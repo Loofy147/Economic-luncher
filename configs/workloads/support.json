@@ -1,0 +1,13 @@
+{
+  "name": "support",
+  "description": "AI-assisted customer support chat, most users have 1-2 short sessions",
+  "emails_per_mau_per_month": 2,
+  "redis_commands_per_mau_per_month": 80,
+  "upstash_storage_mb_estimate": 250,
+  "ai_active_fraction_of_mau": 0.35,
+  "turns_per_ai_user_per_month": 6,
+  "prompt_base_tokens": 300,
+  "context_growth_tokens_per_turn": 500,
+  "output_tokens_per_turn": 350,
+  "cache_enabled": true
+}

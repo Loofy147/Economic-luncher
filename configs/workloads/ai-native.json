@@ -1,0 +1,13 @@
+{
+  "name": "ai-native",
+  "description": "Product where AI chat IS the product -- nearly every MAU is AI-active, high turn depth",
+  "emails_per_mau_per_month": 3,
+  "redis_commands_per_mau_per_month": 400,
+  "upstash_storage_mb_estimate": 1024,
+  "ai_active_fraction_of_mau": 0.80,
+  "turns_per_ai_user_per_month": 80,
+  "prompt_base_tokens": 200,
+  "context_growth_tokens_per_turn": 900,
+  "output_tokens_per_turn": 700,
+  "cache_enabled": false
+}

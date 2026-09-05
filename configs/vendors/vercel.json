@@ -1,0 +1,20 @@
+{
+  "vendor": "vercel",
+  "as_of": "2026-09-05",
+  "source": "https://vercel.com/docs/functions/usage-and-pricing",
+  "hobby": {"commercial_use_allowed": false, "note": "Free tier; non-commercial only"},
+  "pro": {
+    "base_fee_usd": 20,
+    "usage_credit_usd": 20,
+    "billing_note": "Fluid Compute: Active CPU bills only while code is actively executing on CPU. I/O wait (DB queries, AI model calls, upstream API calls) is NOT billed on Active CPU. Provisioned Memory bills for the full in-flight duration of a request INCLUDING I/O wait.",
+    "rates": {
+      "active_cpu_usd_per_cpu_hour": 0.128,
+      "provisioned_memory_usd_per_gb_hour": 0.0106,
+      "invocations_usd_per_million": 0.60,
+      "fast_data_transfer_usd_per_gb": 0.15,
+      "fast_data_transfer_included_gb": 1000,
+      "edge_requests_usd_per_million": 2.00,
+      "edge_requests_included": 10000000
+    }
+  }
+}

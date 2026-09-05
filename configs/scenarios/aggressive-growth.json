@@ -1,0 +1,9 @@
+{
+  "name": "aggressive-growth",
+  "mau": 750000,
+  "workload": "ai-native",
+  "model": "gpt-5.6-sol",
+  "monthly_revenue_usd": 300000,
+  "avg_transaction_usd": 40,
+  "build_tools": {"cursor": true, "vercel_pro": true, "domain_usd": 2}
+}

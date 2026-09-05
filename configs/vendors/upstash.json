@@ -1,0 +1,18 @@
+{
+  "vendor": "upstash",
+  "as_of": "2026-09-05",
+  "source": "https://upstash.com/pricing/redis",
+  "free": {"base_fee_usd": 0, "included_commands_per_month": 500000, "included_storage_mb": 256},
+  "payg": {
+    "base_fee_usd": 0,
+    "usd_per_100k_commands": 0.20,
+    "note": "Upgrading to a paid tier forfeits the free-tier command allowance; the full monthly command volume is billed at this rate, with no carry-over credit."
+  },
+  "fixed_plans": [
+    {"name": "fixed_250mb", "base_fee_usd": 10, "storage_mb": 250, "included_commands_per_month": null, "note": "commands effectively unlimited within fair-use; bounded by storage/bandwidth, not command count"},
+    {"name": "fixed_1gb", "base_fee_usd": 20, "storage_mb": 1024},
+    {"name": "fixed_5gb", "base_fee_usd": 60, "storage_mb": 5120},
+    {"name": "fixed_10gb", "base_fee_usd": 120, "storage_mb": 10240}
+  ],
+  "selection_note": "Fixed plans are priced by storage footprint, not command volume, so they are cheaper than PAYG for any steady, high-command workload that fits the storage tier. PAYG is preferable for bursty or idle-heavy workloads. The engine computes min(PAYG, best-fit Fixed) subject to a storage_mb estimate supplied by the workload config."
+}

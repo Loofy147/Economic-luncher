@@ -1,0 +1,13 @@
+{
+  "vendor": "supabase",
+  "as_of": "2026-09-05",
+  "source": "https://supabase.com/pricing",
+  "free": {"base_fee_usd": 0, "included_mau": 50000},
+  "pro": {
+    "base_fee_usd": 25,
+    "included_mau": 100000,
+    "mau_overage_usd_per_mau": 0.00325,
+    "compute_credit_usd": 10,
+    "note": "compute_credit only covers the Micro instance tier; storage and egress overage are separate meters not modeled by the MAU formula alone"
+  }
+}

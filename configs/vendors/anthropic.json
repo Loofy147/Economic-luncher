@@ -1,0 +1,23 @@
+{
+  "vendor": "anthropic",
+  "as_of": "2026-09-05",
+  "source": "https://docs.claude.com (pricing) -- $2/$10 confirmed standard, not promotional",
+  "models": {
+    "claude-haiku-4-5": {
+      "input_usd_per_m": 1.00, "output_usd_per_m": 5.00,
+      "cache_write_5m_usd_per_m": 1.25, "cache_write_1h_usd_per_m": 2.00, "cache_read_usd_per_m": 0.10,
+      "context_window": 200000, "long_context_tier": null
+    },
+    "claude-sonnet-5": {
+      "input_usd_per_m": 2.00, "output_usd_per_m": 10.00,
+      "cache_write_5m_usd_per_m": 2.50, "cache_write_1h_usd_per_m": 4.00, "cache_read_usd_per_m": 0.20,
+      "context_window": 1000000, "long_context_tier": null
+    },
+    "claude-opus-5": {
+      "input_usd_per_m": 5.00, "output_usd_per_m": 25.00,
+      "cache_write_5m_usd_per_m": 6.25, "cache_write_1h_usd_per_m": 10.00, "cache_read_usd_per_m": 0.50,
+      "context_window": 1000000, "long_context_tier": null
+    }
+  },
+  "note": "5-minute cache writes at 1.25x base input; 1-hour cache writes at 2x; cache reads at 0.1x on all three models. No model in the Claude line carries a long-context price surcharge."
+}

@@ -1,0 +1,31 @@
+{
+  "vendor": "google",
+  "as_of": "2026-09-05",
+  "source": "ai.google.dev/pricing",
+  "models": {
+    "gemini-3.1-flash-lite": {
+      "input_usd_per_m": 0.25, "output_usd_per_m": 1.50, "cache_read_usd_per_m": 0.025,
+      "context_window": 1000000, "long_context_threshold_tokens": null
+    },
+    "gemini-3.8-flash": {
+      "input_usd_per_m": 0.75, "output_usd_per_m": 3.75, "cache_read_usd_per_m": 0.075,
+      "context_window": 1000000, "long_context_threshold_tokens": null,
+      "pricing_status": "introductory_through_2026-12-31",
+      "standard_rate_from_2027-01-01": {"input_usd_per_m": 1.50, "output_usd_per_m": 7.50, "cache_read_usd_per_m": 0.15}
+    },
+    "gemini-3.1-pro": {
+      "input_usd_per_m": 2.00, "output_usd_per_m": 12.00, "cache_read_usd_per_m": 0.20,
+      "context_window": 1000000,
+      "long_context_threshold_tokens": 200000,
+      "long_context_rates": {"input_usd_per_m": 4.00, "output_usd_per_m": 18.00, "cache_read_usd_per_m": 0.40}
+    }
+  },
+  "tools": {
+    "search_grounding": {
+      "free_requests_per_month_per_project": 5000,
+      "usd_per_1k_requests_after": 14,
+      "shared_across": "all Gemini 3.x models in the project"
+    },
+    "maps_grounding": {"note": "separate allowance from search_grounding"}
+  }
+}

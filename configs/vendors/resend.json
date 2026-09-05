@@ -1,0 +1,17 @@
+{
+  "vendor": "resend",
+  "as_of": "2026-09-05",
+  "source": "https://resend.com/docs/knowledge-base/what-is-resend-pricing",
+  "free": {"base_fee_usd": 0, "included_emails": 3000, "daily_cap": 100},
+  "tiers": [
+    {"name": "pro_50k",   "base_fee_usd": 20,   "included_emails": 50000,   "overage_usd_per_1k": 0.90},
+    {"name": "pro_100k",  "base_fee_usd": 35,   "included_emails": 100000,  "overage_usd_per_1k": 0.90},
+    {"name": "scale_100k","base_fee_usd": 90,   "included_emails": 100000,  "overage_usd_per_1k": 0.90},
+    {"name": "scale_200k","base_fee_usd": 160,  "included_emails": 200000,  "overage_usd_per_1k": 0.80},
+    {"name": "scale_500k","base_fee_usd": 350,  "included_emails": 500000,  "overage_usd_per_1k": 0.70},
+    {"name": "scale_1m",  "base_fee_usd": 650,  "included_emails": 1000000, "overage_usd_per_1k": 0.65},
+    {"name": "scale_1.5m","base_fee_usd": 825,  "included_emails": 1500000, "overage_usd_per_1k": 0.52},
+    {"name": "scale_2.5m","base_fee_usd": 1150, "included_emails": 2500000, "overage_usd_per_1k": 0.46}
+  ],
+  "selection_note": "Scale plans buy higher domain limits, longer retention, dedicated-IP eligibility, and lower marginal overage -- but the base-fee premium means Pro remains the cheaper PURE PRICE choice until roughly 450,000-460,000 emails/month (verified by direct tier comparison, not a fixed round-number threshold). Below that volume, picking Scale for its lower headline overage rate alone is a false economy."
+}

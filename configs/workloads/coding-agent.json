@@ -1,0 +1,13 @@
+{
+  "name": "coding-agent",
+  "description": "Cursor-style agentic coding sessions, long deep conversations, unbounded history",
+  "emails_per_mau_per_month": 1,
+  "redis_commands_per_mau_per_month": 300,
+  "upstash_storage_mb_estimate": 1024,
+  "ai_active_fraction_of_mau": 0.90,
+  "turns_per_ai_user_per_month": 250,
+  "prompt_base_tokens": 200,
+  "context_growth_tokens_per_turn": 900,
+  "output_tokens_per_turn": 700,
+  "cache_enabled": true
+}

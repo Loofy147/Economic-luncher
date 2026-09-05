@@ -1,0 +1,6 @@
+{
+  "vendor": "stripe",
+  "as_of": "2026-09-05",
+  "standard_us_online": {"percent": 2.9, "fixed_usd": 0.30},
+  "note": "Scales with revenue and average transaction value, not with MAU or token count -- the only line item in this model with that growth driver."
+}

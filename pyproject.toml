@@ -1,0 +1,12 @@
+[project]
+name = "zero-capex-economics"
+version = "0.1.0"
+description = "Economic cost topology engine for zero-CAPEX, AI-assisted software ventures"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

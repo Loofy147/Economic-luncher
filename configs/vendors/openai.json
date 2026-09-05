@@ -1,0 +1,21 @@
+{
+  "vendor": "openai",
+  "as_of": "2026-09-05",
+  "source": "developers.openai.com/api/docs/models -- Sol pricing marked promotional through 2026-11-21",
+  "models": {
+    "gpt-5.6-terra": {
+      "input_usd_per_m": 2.00, "output_usd_per_m": 12.00,
+      "cache_read_usd_per_m": 0.20, "cache_write_usd_per_m": 2.50,
+      "context_window": 1050000, "long_context_threshold_tokens": null
+    },
+    "gpt-5.6-sol": {
+      "input_usd_per_m": 4.00, "output_usd_per_m": 20.00,
+      "cache_read_usd_per_m": 0.40, "cache_write_usd_per_m": 5.00,
+      "context_window": 1050000,
+      "long_context_threshold_tokens": 272000,
+      "long_context_multiplier": {"input": 2.0, "output": 1.5, "cache_read": 2.0, "cache_write": 2.0},
+      "pricing_status": "promotional_through_2026-11-21",
+      "standard_rate_note": "underlying non-promotional rate is $5/$30; promotional $4/$20 is the live rate as of as_of date"
+    }
+  }
+}

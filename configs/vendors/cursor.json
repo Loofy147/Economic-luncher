@@ -1,0 +1,9 @@
+{
+  "vendor": "cursor",
+  "as_of": "2026-09-05",
+  "pro": {
+    "base_fee_usd": 20,
+    "model_credit_usd": 20,
+    "note": "Model credit draws from the same underlying provider APIs priced in anthropic.json / openai.json / google.json. Heavy agentic sessions on a flagship model can exhaust it before the billing period ends; overflow bills metered on-demand."
+  }
+}
